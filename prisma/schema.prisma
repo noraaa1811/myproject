@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model PokemonSpecies {
+  name      String           @id
+  types     String[]         // Native PostgreSQL array type
+  hp        Int
+  atk       Int
+  def       Int
+  spa       Int
+  spd       Int
+  spe       Int
+  
+  abilities PokemonAbility[]
+  items     PokemonItem[]
+  moves     PokemonMove[]
+  usage     SmogonUsage?
+}
+
+model PokemonAbility {
+  id          Int            @id @default(autoincrement())
+  speciesName String
+  abilityName String
+  percentage  Float          // e.g., 0.85 for 85% usage
+  
+  pokemon     PokemonSpecies @relation(fields: [speciesName], references: [name], onDelete: Cascade)
+
+  @@index([speciesName])
+}
+
+model PokemonItem {
+  id          Int            @id @default(autoincrement())
+  speciesName String
+  itemName    String
+  percentage  Float          // usage rate
+  
+  pokemon     PokemonSpecies @relation(fields: [speciesName], references: [name], onDelete: Cascade)
+
+  @@index([speciesName])
+}
+
+model PokemonMove {
+  id          Int            @id @default(autoincrement())
+  speciesName String
+  moveName    String
+  percentage  Float          // usage rate
+  
+  pokemon     PokemonSpecies @relation(fields: [speciesName], references: [name], onDelete: Cascade)
+
+  @@index([speciesName])
+}
+
+model SmogonUsage {
+  speciesName String         @id
+  usageRate   Float          // e.g., 0.125 for 12.5% usage in tier
+  rank        Int
+  format      String         // e.g., "gen9ou"
+  
+  pokemon     PokemonSpecies @relation(fields: [speciesName], references: [name], onDelete: Cascade)
+}
